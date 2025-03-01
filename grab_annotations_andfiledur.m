@@ -47,7 +47,11 @@ for ai = 1:n_layers
         if count == 0
             a=session.data.annLayer(ai).getEvents(count);
         else
-            a=session.data.annLayer(ai).getNextEvents(a(n_ann));
+            try
+                a=session.data.annLayer(ai).getNextEvents(a(n_ann));
+            catch % this happened once, very bizzare, can't figure out error, possibly because exactly 250 annotations?
+                a = [];
+            end
         end
         if isempty(a), break; end
         n_ann = length(a);
