@@ -1,0 +1,76 @@
+function [bipolar_values,bipolar_labels] = scalp_bipolar(chLabels,values)
+
+montage = {'Fp1','F7';...
+    'F7','T3';...
+    'T3','T5';...
+    'T5','O1';...
+    '','';...
+    'Fp2','F8';...
+    'F8','T4';...
+    'T4','T6';...
+    'T6','O2';...
+    '','';...
+    'Fp1','F3';...
+    'F3','C3';...
+    'C3','P3';...
+    'P3','O1';...
+    '','';...
+    'Fp2','F4';...
+    'F4','C4';...
+    'C4','P4';...
+    'P4','O2';...
+    '','';...
+    'Fz','Cz';...
+    '','';...
+    '','';...
+    'EKG1',''};
+
+bipolar_labels = cellfun(@(x,y) sprintf('%s-%s',x,y),montage(:,1),montage(:,2),'uniformoutput',false);
+
+nsamples = size(values,1);
+nbi_channels = size(montage,1);
+bipolar_values = nan(nsamples,nbi_channels);
+
+% convert EKGL and R to 1 and 2
+chLabels(strcmp(chLabels,'ECGL')) = {'EKG1'};
+chLabels(strcmp(chLabels,'ECGR')) = {'EKG2'};
+
+for ib = 1:nbi_channels
+    
+    curr_mon = montage(ib,:);
+    
+    % leave the empty rows nans (just to designate blank space)
+    if strcmp(curr_mon{1},'') && strcmp(curr_mon{2},'')
+        continue;
+    end
+    
+    % get the channel labels that match
+    lab1 = strcmp(chLabels,curr_mon{1});
+    lab2 = strcmp(chLabels,curr_mon{2});
+
+    
+    if ~(sum(lab1)==1 && sum(lab2)==1)
+        if contains(curr_mon{1},'EKG')
+            if sum(lab1) == 0
+                continue
+            end
+        else
+            error('missing expected channel')
+        end
+    end
+
+    if sum(lab2) == 0 && strcmp(chLabels(lab1),'EKG1')
+        bipolar_values(:,ib) = values(:,lab1);
+        continue
+    end
+    
+    % get difference in eeg signal
+    val1 = values(:,lab1);
+    val2 = values(:,lab2);
+    bipolar_values(:,ib) = val1-val2;
+    
+    
+end
+
+
+end
