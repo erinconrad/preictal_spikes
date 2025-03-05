@@ -61,7 +61,7 @@ for i = start_row:size(T,1)
     next_day = day + 1;
 
     % get the first part of the filename
-    C = strsplit(file,'_');
+    C = strsplit(filename,'_');
     adm_id = C{1};
 
      % get the file name for the next day
