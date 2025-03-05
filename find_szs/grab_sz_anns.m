@@ -4,17 +4,17 @@
 first_row = 6799;
 
 %% paths
-addpath('../tools/');
+addpath('../../tools/');
 paths = preictal_paths;
 
 %% patient list
-patient_list = '../data/deid_with_redcap.csv';
-out_path = '../data/sz_anns.csv';
+patient_list = '../../data/deid_with_redcap.csv';
+out_path = '../../data/sz_anns.csv';
 
 %% Load it
 T = readtable(patient_list);
 
-out_var =  {'Patient', 'IEEGname','annotation_time','annotation','file_duration'};
+out_var =  {'Patient', 'IEEGname','annotation_time','annotation','file_duration','prior_file_duration'};
 %% Load the out_path
 if exist(out_path,'file') ~= 0
     szT = readtable(out_path);
@@ -24,13 +24,16 @@ if exist(out_path,'file') ~= 0
 else
     % Prep annotation table
     
-    szT = table('Size', [0 5], 'VariableTypes', ...
-        {'double', 'cell','double','cell','double'}, 'VariableNames', ...
+    szT = table('Size', [0 6], 'VariableTypes', ...
+        {'double', 'cell','double','cell','double','double'}, 'VariableNames', ...
        out_var);
     start_row = first_row;
 end
 
 fprintf('\nStarting with row %d\n',start_row);
+
+% initialize last sz T to be empty
+lastT = [];
 
 for i = start_row:size(T,1)
 
@@ -46,6 +49,8 @@ for i = start_row:size(T,1)
         continue
     end
 
+    
+
     %% Mine for seizure-y annotations
     sz_annotations = contains(aT.annotations,["seizure","sz","onset","UEO","EEC"],'IgnoreCase',true);
     szT_curr = aT(sz_annotations,:);
@@ -54,14 +59,28 @@ for i = start_row:size(T,1)
     szT_curr(contains(szT_curr.annotations,'Persyst'),:) = [];
 
     nsz = size(szT_curr,1);
-    if nsz == 0, continue; end
-    szT = [szT;table(repmat(patient_id,nsz,1),...
-        cellstr(repmat(filename,nsz,1)),...
-        szT_curr.annotation_times,...
-        szT_curr.annotations,...
-        szT_curr.file_duration,...
-        'VariableNames',out_var)];
+    if nsz ~=0
+        if isempty(lastT)
+            szT = [szT;table(repmat(patient_id,nsz,1),...
+                cellstr(repmat(filename,nsz,1)),...
+                szT_curr.annotation_times,...
+                szT_curr.annotations,...
+                szT_curr.file_duration,...
+                nan(nsz,1),...
+                'VariableNames',out_var)];
+        else
+            szT = [szT;table(repmat(patient_id,nsz,1),...
+                cellstr(repmat(filename,nsz,1)),...
+                szT_curr.annotation_times,...
+                szT_curr.annotations,...
+                szT_curr.file_duration,...
+                repmat(lastT.file_duration(1),nsz,1),...
+                'VariableNames',out_var)];
+        end
+    end
 
+    % Update the lastT to be this one
+    lastT = aT;
 
     writetable(szT,out_path);
 

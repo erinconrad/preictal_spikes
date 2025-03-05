@@ -12,13 +12,13 @@ cluster_time = 60*60*6; % 6 hours
 
 
 %% paths
-addpath('../tools/');
+addpath('../../tools/');
 paths = preictal_paths;
 
 %% patient list
-patient_list = '../data/deid_with_redcap.csv';
-sz_ann_path = '../data/sz_anns.csv';
-out_path = '../data/isolated_szs.csv';
+patient_list = '../../data/deid_with_redcap.csv';
+sz_ann_path = '../../data/sz_anns.csv';
+out_path = '../../data/isolated_szs.csv';
 
 %% Load the pt list
 pT = readtable(patient_list);

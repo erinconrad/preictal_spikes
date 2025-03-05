@@ -4,11 +4,11 @@ i = 5;
 surround = 7;
 
 %% paths
-addpath('../tools/');
+addpath('../../tools/');
 paths = preictal_paths;
 
 %% patient list
-sz_path = '../data/isolated_szs.csv';
+sz_path = '../../data/isolated_szs.csv';
 
 T = readtable(sz_path);
 
