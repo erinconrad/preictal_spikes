@@ -32,8 +32,6 @@ end
 
 fprintf('\nStarting with row %d\n',start_row);
 
-% initialize last sz T to be empty
-lastT = [];
 
 for i = start_row:size(T,1)
 
@@ -50,7 +48,6 @@ for i = start_row:size(T,1)
         continue
     end
 
-    aT.filename = repmat({filename},size(aT,1),1);
 
     %% Get the next file name
 
@@ -59,6 +56,7 @@ for i = start_row:size(T,1)
     tokens = regexp(filename, pattern, 'tokens');
     day = str2double(tokens{1}(1));
     next_day = day + 1;
+    prior_day = day - 1;
 
     % get the first part of the filename
     C = strsplit(filename,'_');
@@ -71,13 +69,29 @@ for i = start_row:size(T,1)
         next_file = sprintf('%s_Day%d_1',adm_id,next_day);
     end
 
-    % see if the file exists
-    nT = grab_annotations_andfiledur(next_file,paths.ieeg_folder,...
+    if prior_day < 10
+        prior_file = sprintf('%s_Day0%d_1',adm_id,prior_day);
+    else
+        prior_file = sprintf('%s_Day%d_1',adm_id,prior_day);
+    end
+
+    % see if the files exist
+    nextT = grab_annotations_andfiledur(next_file,paths.ieeg_folder,...
         paths.ieeg_pw_file,paths.ieeg_login);
-    if isempty(nT)
-        next_filename = {};
+    if isempty(nextT)
+        next_filename = {''};
     else
         next_filename = {next_file};
+    end
+
+    priorT = grab_annotations_andfiledur(prior_file,paths.ieeg_folder,...
+        paths.ieeg_pw_file,paths.ieeg_login);
+    if isempty(priorT)
+        prior_filename = {''};
+        prior_file_duration = nan;
+    else
+        prior_filename = {prior_file};
+        prior_file_duration = priorT.file_duration(1);
     end
     
 
@@ -90,31 +104,18 @@ for i = start_row:size(T,1)
 
     nsz = size(szT_curr,1);
     if nsz ~=0
-        if isempty(lastT)
-            szT = [szT;table(repmat(patient_id,nsz,1),...
-                cellstr(repmat(filename,nsz,1)),...
-                szT_curr.annotation_times,...
-                szT_curr.annotations,...
-                szT_curr.file_duration,...
-                cell(nsz,1),...
-                nan(nsz,1),...
-                repmat(next_filename,nsz,1),...
-                'VariableNames',out_var)];
-        else
-            szT = [szT;table(repmat(patient_id,nsz,1),...
-                cellstr(repmat(filename,nsz,1)),...
-                szT_curr.annotation_times,...
-                szT_curr.annotations,...
-                szT_curr.file_duration,...
-                repmat(lastT.filename(1),nsz,1),...
-                repmat(lastT.file_duration(1),nsz,1),...
-                repmat(next_filename,nsz,1),...
-                'VariableNames',out_var)];
-        end
+        szT = [szT;table(repmat(patient_id,nsz,1),...
+            cellstr(repmat(filename,nsz,1)),...
+            szT_curr.annotation_times,...
+            szT_curr.annotations,...
+            szT_curr.file_duration,...
+            repmat(prior_filename,nsz,1),...
+            repmat(prior_file_duration,nsz,1),...
+            repmat(next_filename,nsz,1),...
+            'VariableNames',out_var)];
+        
     end
 
-    % Update the lastT to be this one
-    lastT = aT;
 
     writetable(szT,out_path);
 

@@ -42,10 +42,12 @@ for i = 1:nszs
 
         % adjust for file duration
         if chunk_start_unadjusted < 0
+            chunk_start_unadjusted = 
 
         elseif chunk_end_unadjusted > ***
 
         else
+            chunk_times(j,:) = [chunk_start_unadjusted chunk_end_unadjusted];
             chunk_files{j} = ieeg_file;
         end
     end
