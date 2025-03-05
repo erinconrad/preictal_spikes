@@ -46,6 +46,8 @@ for i = 1:nszs
     sz_time = T.annotation_time(i);
     file = T.IEEGname{i};
     duration = T.file_duration(i);
+    prior_file = T.prior_file{i};
+    prior_file_duration = T.prior_file_duration(i);
 
     % get the day of the file
     pattern = '(?<=_Day)(\d{2})(?=_)';
@@ -82,16 +84,7 @@ for i = 1:nszs
             isolated(i) = 0; % if first file, can't say it's isolated
             continue
         else
-            % is there a prior day's file
-            prior_day = day-1;
-
-            % get the file name for the prior day
-            if prior_day < 10
-                prior_file = sprintf('%s_Day0%d_1',adm_id,prior_day);
-            else
-                prior_file = sprintf('%s_Day%d_1',adm_id,prior_day);
-            end
-
+            
             % get rows for prior day
             prior_day_rows = T(strcmp(T.IEEGname,prior_file),:);
             if isempty(prior_day_rows)
@@ -108,7 +101,7 @@ for i = 1:nszs
 
             if ~isempty(prior_day_rows)
                 % Get the duration of the prior file
-                prior_file_duration = prior_day_rows.file_duration(1);
+                assert(prior_file_duration == prior_day_rows.file_duration(1))
     
                 % Add this duration to the sz_time to get the time in the same
                 % scale as the time of the last file - e.g., if a time in prior

@@ -14,7 +14,7 @@ out_path = '../../data/sz_anns.csv';
 %% Load it
 T = readtable(patient_list);
 
-out_var =  {'Patient', 'IEEGname','annotation_time','annotation','file_duration','prior_file','prior_file_duration'};
+out_var =  {'Patient', 'IEEGname','annotation_time','annotation','file_duration','prior_file','prior_file_duration','next_file'};
 %% Load the out_path
 if exist(out_path,'file') ~= 0
     szT = readtable(out_path);
@@ -24,8 +24,8 @@ if exist(out_path,'file') ~= 0
 else
     % Prep annotation table
     
-    szT = table('Size', [0 7], 'VariableTypes', ...
-        {'double', 'cell','double','cell','double','cell','double'}, 'VariableNames', ...
+    szT = table('Size', [0 8], 'VariableTypes', ...
+        {'double', 'cell','double','cell','double','cell','double','cell',}, 'VariableNames', ...
        out_var);
     start_row = first_row;
 end
@@ -51,6 +51,34 @@ for i = start_row:size(T,1)
     end
 
     aT.filename = repmat({filename},size(aT,1),1);
+
+    %% Get the next file name
+
+    % get the day of the file
+    pattern = '(?<=_Day)(\d{2})(?=_)';
+    tokens = regexp(filename, pattern, 'tokens');
+    day = str2double(tokens{1}(1));
+    next_day = day + 1;
+
+    % get the first part of the filename
+    C = strsplit(file,'_');
+    adm_id = C{1};
+
+     % get the file name for the next day
+    if next_day < 10
+        next_file = sprintf('%s_Day0%d_1',adm_id,next_day);
+    else
+        next_file = sprintf('%s_Day%d_1',adm_id,next_day);
+    end
+
+    % see if the file exists
+    nT = grab_annotations_andfiledur(next_file,paths.ieeg_folder,...
+        paths.ieeg_pw_file,paths.ieeg_login);
+    if isempty(nT)
+        next_filename = {};
+    else
+        next_filename = {next_file};
+    end
     
 
     %% Mine for seizure-y annotations
@@ -70,6 +98,7 @@ for i = start_row:size(T,1)
                 szT_curr.file_duration,...
                 cell(nsz,1),...
                 nan(nsz,1),...
+                repmat(next_filename,nsz,1),...
                 'VariableNames',out_var)];
         else
             szT = [szT;table(repmat(patient_id,nsz,1),...
@@ -79,6 +108,7 @@ for i = start_row:size(T,1)
                 szT_curr.file_duration,...
                 repmat(lastT.filename(1),nsz,1),...
                 repmat(lastT.file_duration(1),nsz,1),...
+                repmat(next_filename,nsz,1),...
                 'VariableNames',out_var)];
         end
     end

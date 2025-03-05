@@ -27,13 +27,29 @@ for i = 1:nszs
     sz_time = T.annotation_time(i);
     ieeg_file = T.IEEGname{i};
     patient = T.Patient(i);
+    prior_file = T.prior_file{i};
+    prior_file_duration = T.prior_file_duration(i);
 
     %% Determine the times and files over which to run ieeg.org
     % initialize
     chunk_times = nan(nchunks,2);
     chunk_files = cell(nchunks,1);
 
-    % fill these up with values that ignore the file duration
+    % fill these up with values
+    for j = 1:nchunks
+        chunk_start_unadjusted = sz_time - chunk_size * nchunks/2 + (j-1) * chunk_size;
+        chunk_end_unadjusted = chunk_start_unadjusted + chunk_size;
+
+        % adjust for file duration
+        if chunk_start_unadjusted < 0
+
+        elseif chunk_end_unadjusted > ***
+
+        else
+            chunk_files{j} = ieeg_file;
+        end
+    end
+
 
 
 end
