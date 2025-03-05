@@ -43,12 +43,14 @@ for i = start_row:size(T,1)
     % Get all annotations and file dur
     aT = grab_annotations_andfiledur(filename,paths.ieeg_folder,...
         paths.ieeg_pw_file,paths.ieeg_login);
+    
 
     if isempty(aT)
         fprintf(['\nPatient %d %s failed \n'],patient_id,filename);
         continue
     end
 
+    aT.filename = repmat(filename,size(aT,1),1);
     
 
     %% Mine for seizure-y annotations
