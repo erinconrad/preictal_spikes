@@ -31,6 +31,7 @@ for i = 1:length(listing)
 
     % Make output path
     curr_prob_path = [spike_prob_dir,listing(i).name,'/'];
+    mkdir(curr_prob_path);
 
     fprintf('\nRunning spike net for %s\n',listing(i).name);
 
