@@ -6,9 +6,7 @@ prob_thresh = 0.9;
 %% Paths
 spike_prob_path = '../../spike_probs/';
 eeg_data_path = '../../eeg_data/';
-spike_detections_path = '../../spike_detections/';
-
-if ~exist(spike_detections_path,"dir"), mkdir(spike_detections_path); end
+spike_detects_path
 
 % Loop over spike prob directories
 listing = dir(spike_prob_path);
@@ -23,12 +21,6 @@ for i = 1:length(listing)
     meta = load([eeg_data_path,listing(i).name,'/meta.mat']);
     meta = meta.meta;
     chunk_dur = 600;
-
-    detections = meta;
-    detections.detections = cell(length(chunk_files),1);
-
-    sub_detection_path = [spike_detections_path,listing(i).name,'/'];
-    if ~exist(sub_detection_path,"dir"), mkdir(sub_detection_path); end
 
     % get the full path
     curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
@@ -79,12 +71,8 @@ for i = 1:length(listing)
             above_thresh_new(midIdx) = 1;
         end
 
-        %% Output detections
-        detections.detections{j} = times(above_thresh_new);
+        %% 
 
     end
-
-    %% Save detections
-    save([sub_detection_path,'detections.mat'],'detections')
     
 end

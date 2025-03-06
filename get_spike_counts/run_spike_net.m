@@ -7,6 +7,10 @@ spike net, thus outputting spike probabilities in a separate directory
 
 %}
 
+if ~exist("start_sz","var")
+    error('list start sz');
+end
+
 %% Paths
 spikenet2_env = '/mnt/sauce/littlab/users/erinconr/conda_env/spikenet2';
 spikenet2_script_path = '/mnt/sauce/littlab/users/erinconr/utilities/SN2R11_demo_20240715/';
@@ -19,7 +23,7 @@ cd(spikenet2_script_path)
 
 % Loop over eeg subdirs
 listing = dir(eeg_dir);
-for i = 1:length(listing)
+for i = start_sz:length(listing)
 
     % Skip if not an expected name
     if ~contains(listing(i).name,'sz') || strcmp(listing(i).name(1),'.')
