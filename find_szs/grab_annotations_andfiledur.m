@@ -11,8 +11,8 @@ while 1
         session = IEEGSession(ieeg_name,login_name,pwfile);
         break
     catch ME
-        if contains(ME.message,'503') || contains(ME.message,'504') || ...
-                contains(ME.message,'502') || contains(ME.message,'500')
+        if (contains(ME.message,'503') || contains(ME.message,'504') || ...
+                contains(ME.message,'502') || contains(ME.message,'500')) && ~contains(ME.message,'EMU')
             attempt = attempt + 1;
             fprintf('Failed to retrieve ieeg.org data, trying again (attempt %d)\n',attempt); 
         else
