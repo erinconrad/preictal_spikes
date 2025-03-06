@@ -23,12 +23,15 @@ cd(spikenet2_script_path)
 
 % Loop over eeg subdirs
 listing = dir(eeg_dir);
-for i = start_sz:length(listing)
+for i = 1:length(listing)
 
     % Skip if not an expected name
     if ~contains(listing(i).name,'sz') || strcmp(listing(i).name(1),'.')
         continue;
     end
+
+    numStr = regexp(listing(i).name,'\d+','match');
+    if numStr<start_sz, continue; end
 
     % get the full path
     curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
