@@ -25,7 +25,9 @@ for i = 1:length(listing)
     chunk_dur = 600;
 
     detections = meta;
-    detections.detections = cell(length(chunk_files),1);
+    detections.detections = cell(length(meta.chunk_files),1);
+    detections.all_detections = [];
+    detections.detection_files = {};
 
     sub_detection_path = [spike_detections_path,listing(i).name,'/'];
     if ~exist(sub_detection_path,"dir"), mkdir(sub_detection_path); end
@@ -78,10 +80,18 @@ for i = 1:length(listing)
             midIdx = groupIdx(round(length(groupIdx)/2));
             above_thresh_new(midIdx) = 1;
         end
+        above_thresh_new = logical(above_thresh_new);
 
         %% Output detections
         detections.detections{j} = times(above_thresh_new);
-
+        % Calculate number of detections from the logical index.
+        ndetections = sum(above_thresh_new);
+        
+        % Append detection times as a column vector.
+        detections.all_detections = [detections.all_detections; times(above_thresh_new)' + meta.chunk_times(j,1)];
+        
+        % Append file names as a cell array of strings to match the number of detections.
+        detections.detection_files = [detections.detection_files; repmat({meta.chunk_files{j}}, ndetections, 1)];
     end
 
     %% Save detections
