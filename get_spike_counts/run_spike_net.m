@@ -18,7 +18,7 @@ listing = dir(eeg_dir);
 for i = 1:length(listing)
 
     % Skip if not an expected name
-    if ~contains(listing(i).name,'sz')
+    if ~contains(listing(i).name,'sz') || strcmp(listing(i).name(1),'.')
         continue;
     end
 
