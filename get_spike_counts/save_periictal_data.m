@@ -2,7 +2,9 @@
 % SHOULD I ADD A NEGATIVE OFFSET TO THE SZ TIME OF ONE MINUTE SO THAT THE
 % ONE MINUTE PREICTAL PERIOD IS IN THE SZ WINDOW???
 
-start_sz= 1;
+if ~exist("start_sz","var")
+    error('please specify start_sz');
+end
 
 %% Parameters
 duration = 6*3600; % 6 hours
@@ -186,6 +188,14 @@ for i = start_sz:nszs
 
 
     end
+
+    %% Save a metadata file
+    meta.patient = patient;
+    meta.ieeg_file = ieeg_file;
+    meta.sz_time = sz_time;
+    meta.chunk_times = chunk_times;
+    meta.chunk_files = chunk_files;
+    save([subdir,'meta.mat'],"meta")
 
 
 
