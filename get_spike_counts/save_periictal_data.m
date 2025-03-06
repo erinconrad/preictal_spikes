@@ -2,6 +2,7 @@
 % SHOULD I ADD A NEGATIVE OFFSET TO THE SZ TIME OF ONE MINUTE SO THAT THE
 % ONE MINUTE PREICTAL PERIOD IS IN THE SZ WINDOW???
 
+start_sz= 1;
 
 %% Parameters
 duration = 6*3600; % 6 hours
@@ -26,7 +27,7 @@ T = T(T.isolated==1,:); % restrict to isolated
 nszs = size(T,1);
 
 % Loop over the szs
-for i = 1:nszs
+for i = start_sz:nszs
 
     %% Get data about the sz
     sz_time = T.annotation_time(i);

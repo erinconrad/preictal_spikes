@@ -30,7 +30,7 @@ isolated = nan(nszs,1);
 
 %% Decide what to call a definitive sz
 % An annotation of eec or ueo
-def_sz = contains(T.annotation,["eec","ueo"],"IgnoreCase",true);
+def_sz = contains(T.annotation,"ueo","IgnoreCase",true);
 
 %% Do logic to decide if it's isolated
 % Note that this might result in multiple annotations for the same sz if
