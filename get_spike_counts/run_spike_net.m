@@ -13,10 +13,6 @@ spikenet2_script_path = '/mnt/sauce/littlab/users/erinconr/utilities/SN2R11_demo
 eeg_dir = '/mnt/sauce/littlab/users/erinconr/projects/preictal_spikes/eeg_data/';
 spike_prob_dir = '/mnt/sauce/littlab/users/erinconr/projects/preictal_spikes/spike_probs/';
 
-%% Activate conda environment
-system(sprintf('conda activate %s',spikenet2_env));
-
-
 % Loop over eeg subdirs
 listing = dir(eeg_dir);
 for i = 1:length(listing)
@@ -36,7 +32,8 @@ for i = 1:length(listing)
     fprintf('\nRunning spike net for %s\n',listing(i).name);
 
     %% Run spike net
-    system(sprintf('python %s %s %s',spikenet2_script_path,curr_eeg_path,curr_prob_path));
+    system(sprintf('conda run -n %s python %s %s %s',...
+        spikenet2_env,spikenet2_script_path,curr_eeg_path,curr_prob_path));
 
     
 
