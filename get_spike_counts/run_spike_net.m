@@ -9,9 +9,13 @@ spike net, thus outputting spike probabilities in a separate directory
 
 %% Paths
 spikenet2_env = '/mnt/sauce/littlab/users/erinconr/conda_env/spikenet2';
-spikenet2_script_path = '/mnt/sauce/littlab/users/erinconr/utilities/SN2R11_demo_20240715/run_sn2r11.py';
+spikenet2_script_path = '/mnt/sauce/littlab/users/erinconr/utilities/SN2R11_demo_20240715/';
 eeg_dir = '/mnt/sauce/littlab/users/erinconr/projects/preictal_spikes/eeg_data/';
 spike_prob_dir = '/mnt/sauce/littlab/users/erinconr/projects/preictal_spikes/spike_probs/';
+spike_net_script = 'run_sn2r11.py';
+
+%% CD to spike net directory
+cd(spikenet2_script_path)
 
 % Loop over eeg subdirs
 listing = dir(eeg_dir);
@@ -33,7 +37,7 @@ for i = 1:length(listing)
 
     %% Run spike net
     system(sprintf('conda run -p %s python %s %s %s',...
-        spikenet2_env,spikenet2_script_path,curr_eeg_path,curr_prob_path));
+        spikenet2_env,spike_net_script,curr_eeg_path,curr_prob_path));
 
     
 
