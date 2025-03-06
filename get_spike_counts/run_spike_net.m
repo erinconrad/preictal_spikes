@@ -32,7 +32,7 @@ for i = 1:length(listing)
     fprintf('\nRunning spike net for %s\n',listing(i).name);
 
     %% Run spike net
-    system(sprintf('conda run -n %s python %s %s %s',...
+    system(sprintf('conda run -p %s python %s %s %s',...
         spikenet2_env,spikenet2_script_path,curr_eeg_path,curr_prob_path));
 
     
