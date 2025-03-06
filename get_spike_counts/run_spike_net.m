@@ -31,7 +31,7 @@ for i = 1:length(listing)
     end
 
     numStr = regexp(listing(i).name,'\d+','match');
-    if numStr<start_sz, continue; end
+    if str2num(numStr{1})<start_sz, continue; end
 
     % get the full path
     curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
