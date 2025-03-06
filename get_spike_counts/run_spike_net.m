@@ -29,6 +29,18 @@ for i = 1:length(listing)
     % get the full path
     curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
 
+    % Look for and delete files within the eeg path that start with '._'. These will
+    % screw up spike net
+    sublisting = dir(curr_eeg_path);
+    for j = 1:length(sublisting)
+        if startsWith(sublisting(j).name,'.') && contains(sublisting(j).name,'mat')
+            delete([curr_eeg_path,sublisting(j).name]);
+        end
+    
+    end
+
+
+
     % Make output path
     curr_prob_path = [spike_prob_dir,listing(i).name,'/'];
     mkdir(curr_prob_path);
