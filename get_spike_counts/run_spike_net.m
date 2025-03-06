@@ -23,7 +23,7 @@ for i = 1:length(listing)
     end
 
     % get the full path
-    curr_eeg_path = [listing(i).folder,listing(i).name,'/'];
+    curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
 
     % Make output path
     curr_prob_path = [spike_prob_dir,listing(i).name,'/'];
