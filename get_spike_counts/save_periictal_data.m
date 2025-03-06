@@ -2,7 +2,6 @@
 % SHOULD I ADD A NEGATIVE OFFSET TO THE SZ TIME OF ONE MINUTE SO THAT THE
 % ONE MINUTE PREICTAL PERIOD IS IN THE SZ WINDOW???
 
-% need to accoun for non finite things in filtfilt
 
 %% Parameters
 duration = 6*3600; % 6 hours
@@ -23,7 +22,7 @@ end
 
 %% Grab the isolated szs
 T = readtable(sz_path);
-T = T(T.isolated==1,:);
+T = T(T.isolated==1,:); % restrict to isolated
 nszs = size(T,1);
 
 % Loop over the szs
@@ -31,6 +30,7 @@ for i = 1:nszs
 
     %% Get data about the sz
     sz_time = T.annotation_time(i);
+    sz_time_padded = sz_time - 60; % go back one minute so that seizure window starts one minute before annotation
     ieeg_file = T.IEEGname{i};
     patient = T.Patient(i);
     file_duration = T.file_duration(i);
@@ -45,25 +45,30 @@ for i = 1:nszs
 
     % fill these up with values
     for j = 1:nchunks
-        chunk_start_unadjusted = sz_time - chunk_size * nchunks/2 + (j-1) * chunk_size;
+        chunk_start_unadjusted = sz_time_padded - chunk_size * nchunks/2 + (j-1) * chunk_size; 
+        % if j = 1, this goes 6 hours back. If j = 37, then the start is
+        % sz_time padded. if j=72, this goes 6 hours forward.
+
         chunk_end_unadjusted = chunk_start_unadjusted + chunk_size;
 
         % adjust for file duration
+
+        % if negative chunk start, need to look at prior file
         if chunk_start_unadjusted < 0
-            if chunk_end_unadjusted > 0
+            if chunk_end_unadjusted > 0 % chunk crosses files
                 chunk_times(j,:) = [nan nan]; % ignore chunks that cross files
                 chunk_files{j} = '';
-            else
+            else % chunk is entirely in prior file
                 chunk_start_adjusted = chunk_start_unadjusted + prior_file_duration;
                 chunk_end_adjusted = chunk_end_unadjusted + prior_file_duration;
                 chunk_times(j,:) = [chunk_start_adjusted chunk_end_adjusted];
                 chunk_files{j} = prior_file;
             end
-        elseif chunk_end_unadjusted > file_duration
-            if chunk_start_unadjusted < file_duration
+        elseif chunk_end_unadjusted > file_duration % chunk ends after current file
+            if chunk_start_unadjusted < file_duration % chunk crosses files
                 chunk_times(j,:) = [nan nan]; % ignore chunks that cross files
                 chunk_files{j} = '';
-            else
+            else % chunk is entirely in next file
                 chunk_start_adjusted = chunk_start_unadjusted - file_duration;
                 chunk_end_adjusted = chunk_end_unadjusted - file_duration;
                 chunk_times(j,:) = [chunk_start_adjusted chunk_end_adjusted];
@@ -96,7 +101,7 @@ for i = 1:nszs
         %% Downsample and filter
         % Downsample the data to 128 Hz
         if fs == 256
-            data = resample(data, 1, 2);
+            data = resample(data, 1, 2); % this includes a built in antialiasing filter
         else
             error('surprising fs');
         end
@@ -108,7 +113,7 @@ for i = 1:nszs
         wo = notchFreq/(fs/2);  
         
         % Choose a quality factor Q (adjust as needed; higher Q means a narrower notch)
-        Q = 35;  
+        Q = 35;  % I don't know what this is but chatgpt did it
         bw = wo/Q;
         
         % Design the notch filter using the IIR notch design
@@ -126,7 +131,6 @@ for i = 1:nszs
         data_filtered = filtfilt(hpFilt, data_notched);
         nsamples = size(data_filtered,1);
         
-
         %% Get the right channels
         allChannels = chLabels;
         desiredChannels = {'Fp1', 'F3', 'C3', 'P3', 'F7', 'T3', 'T5', 'O1', ...
@@ -139,7 +143,7 @@ for i = 1:nszs
         nchs = length(desiredChannels);
         
         for k = 1:length(desiredChannels)
-            if strcmpi(desiredChannels{i}, 'EKG')
+            if strcmpi(desiredChannels{k}, 'EKG')
                 % For the EKG channel, use a regex that matches any label starting with
                 % 'EKG' or 'ECG' (case insensitive).
                 ekgMatch = find(~cellfun(@isempty, regexp(allChannels, '^(ekg|ecg)', 'ignorecase')));
@@ -156,7 +160,7 @@ for i = 1:nszs
         end
 
         %% Fill up the right data
-        ordered_data = zeros(nchs,nsamples);
+        ordered_data = zeros(nchs,nsamples); % default to zeros (I think Pz will be zeroed)
         for k = 1:nchs
             index = channelIndices(k);
             if isnan(index), continue; end
