@@ -1,0 +1,66 @@
+%% stitch_probs
+
+which_sz = 10; % which sz
+chunk_dur = 10*60;
+nchunks = 72;
+sz_chunk = 37;
+
+%% Paths
+spike_prob_path = '../../spike_probs/';
+eeg_data_path = '../../eeg_data/';
+
+%% Load the meta file
+%meta = load(sprintf('%ssz_%d/meta.mat',eeg_data_path,which_sz));
+%meta = meta.meta;
+
+%% Path to the spike probs
+curr_prob_path = [spike_prob_path,sprintf('sz_%d',which_sz)];
+
+probs = [];
+times = [];
+transitions = [];
+
+% Loop over the probs
+for i = 1:nchunks
+    % Load the prob
+    T = readtable(sprintf('chunk_%d_sn2r11.csv',i));
+
+    % convert to array
+    a = table2array(T);
+
+    
+    if isempty(times)
+        last_time = 0;
+    else
+        last_time = times(end);
+    end
+
+    curr_times = (linspace(0,chunk_dur,length(a)) + repmat(last_time,1,length(a)))';
+    curr_transitions = zeros(length(a),1);
+    if i == sz_chunk-1
+        curr_transitions(end) = 2;
+    else
+        curr_transitions(end) = 1;
+    end
+
+    probs = [probs;a];
+    times = [times;curr_times];
+    transitions = [transitions;curr_transitions];
+
+
+end
+
+
+%% plot it
+figure
+plot(times,probs);
+hold on
+for i = 1:length(transitions)
+    if transitions(i) == 1
+        plot([times(i) times(i)],ylim,'k--');
+    end
+    if transitions(i) == 2
+        plot([times(i) times(i)],ylim,'k--');
+    end
+
+end

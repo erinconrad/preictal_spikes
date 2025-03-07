@@ -14,6 +14,7 @@ nchunks = duration*2/chunk_size;
 %% Paths
 sz_path = '../../data/isolated_szs.csv';
 eeg_path = '../../eeg_data/';
+meta_path = '../../meta_data/';
 addpath('../../tools/');
 paths = preictal_paths;
 addpath(genpath(paths.ieeg_folder));
@@ -21,6 +22,10 @@ addpath(genpath('../'))
 
 if ~exist("eeg_path","dir")
     mkdir(eeg_path)
+end
+
+if ~exist("meta_path","dir")
+    mkdir(meta_path)
 end
 
 %% Grab the isolated szs
@@ -189,13 +194,16 @@ for i = start_sz:nszs
 
     end
 
+    meta_subdir = [meta_path,sprintf('sz_%d/',i)];
+    if ~exist(meta_subdir,"dir"), mkdir(meta_subdir); end
+
     %% Save a metadata file
     meta.patient = patient;
     meta.ieeg_file = ieeg_file;
     meta.sz_time = sz_time;
     meta.chunk_times = chunk_times;
     meta.chunk_files = chunk_files;
-    save([subdir,'meta.mat'],"meta")
+    save([meta_subdir,'meta.mat'],"meta")
 
 
 
