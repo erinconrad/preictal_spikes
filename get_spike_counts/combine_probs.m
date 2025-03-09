@@ -6,7 +6,7 @@ chunk_dur = 10*60;
 nchunks = 72;
 sz_chunk = 37;
 npoints = 9585;
-nszs = 116;
+nszs = 119;
 
 %% Paths
 spike_prob_path = '../../spike_probs/';
@@ -51,7 +51,7 @@ for i = 1:nszs
 
         % convert to array
         a = table2array(T);
-        counts(i,(j-1)*npoints+1:j*npoints,1) = sum(a>prob_thresh);
+        counts(i,j) = sum(a>prob_thresh);
 
     end
 
@@ -76,10 +76,16 @@ end
 %}
 
 %% Paired plot comparing pre and post
+%pre = prctile(counts(:,1:36),95,2);
+%post = prctile(counts(:,38:end),95,2); % exclude sz one (37)
 pre = nanmean(counts(:,1:36),2);
-post = nanmean(counts(:,38:end),2); % exclude sz one (37)
-x = pre;
-y = post;
+post = nanmean(counts(:,38:end),2);
+
+total_counts= pre+post;
+few_spikes = total_counts < 0;
+
+x = pre(~few_spikes);
+y = post(~few_spikes);
 figure
 
 scatter(x, y, 'filled');

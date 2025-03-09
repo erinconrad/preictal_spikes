@@ -11,6 +11,10 @@ if ~exist("start_sz","var")
     error('list start sz');
 end
 
+if ~exist("end_sz","var")
+    error('please specify end_sz');
+end
+
 %% Paths
 spikenet2_env = '/mnt/sauce/littlab/users/erinconr/conda_env/spikenet2';
 spikenet2_script_path = '/mnt/sauce/littlab/users/erinconr/utilities/SN2R11_demo_20240715/';
@@ -32,6 +36,7 @@ for i = 1:length(listing)
 
     numStr = regexp(listing(i).name,'\d+','match');
     if str2num(numStr{1})<start_sz, continue; end
+    if str2num(numStr{1})>end_sz, continue; end
 
     % get the full path
     curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
