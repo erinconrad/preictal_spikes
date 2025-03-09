@@ -1,5 +1,5 @@
 %% stitch_probs
-
+prob_thresh = 0.5;
 plot_mean = 1;
 chunk_dur = 10*60;
 nchunks = 72;
@@ -46,7 +46,7 @@ for i = 1:nchunks
     % convert to array
     a = table2array(T);
     probs((i-1)*npoints+1:i*npoints,1) = a;
-    mean_probs((i-1)*npoints+1:i*npoints,1) = sum(a>0.5);
+    mean_probs((i-1)*npoints+1:i*npoints,1) = sum(a>prob_thresh);
 
 
 end
@@ -71,3 +71,5 @@ for i = 1:length(transitions)
     end
 
 end
+
+fprintf('\nplotting sz %d\n',which_sz);

@@ -6,6 +6,10 @@ if ~exist("start_sz","var")
     error('please specify start_sz');
 end
 
+if ~exist("end_sz","var")
+    error('please specify start_sz');
+end
+
 %% Parameters
 duration = 6*3600; % 6 hours
 chunk_size = 10*60; % 10 minutes
@@ -34,7 +38,7 @@ T = T(T.isolated==1,:); % restrict to isolated
 nszs = size(T,1);
 
 % Loop over the szs
-for i = start_sz:nszs
+for i = start_sz:end_sz
 
     %% Get data about the sz
     sz_time = T.annotation_time(i);
