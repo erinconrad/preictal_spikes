@@ -33,6 +33,8 @@ for i = 1:length(listing)
     if ~contains(listing(i).name,'sz') || strcmp(listing(i).name(1),'.')
         continue;
     end
+
+    fprintf('\nDoing seizure %d\n',i);
     
     numStr = regexp(listing(i).name,'\d+','match');
     if str2num(numStr{1})<start_sz, continue; end
