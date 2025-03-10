@@ -69,6 +69,8 @@ for i = 1:length(listing)
         %% Convert to bipolar I guess
         [bipolar_values,bipolar_labels] = scalp_bipolar(channels,data');
 
+        %% Make nans zeros
+        bipolar_values(isnan(bipolar_values)) = 0;
 
         %% Compute power in each band for every channel
         bp_broadband = bandpower(bipolar_values, Fs, broadbandRange);
