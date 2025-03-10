@@ -80,7 +80,8 @@ for i = 1:length(listing)
         %% Save this
         save([curr_output_dir,sprintf('chunk_%d.mat',j)],...
             "bp_broadband","bp_delta","bp_theta","bp_alpha",...
-            "bp_beta","bp_gamma","bp_sixty");
+            "bp_beta","bp_gamma","bp_sixty","bipolar_labels","curr_file",...
+            "curr_times");
 
 
     end
