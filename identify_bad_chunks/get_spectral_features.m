@@ -75,7 +75,7 @@ for i = 1:length(listing)
         bipolar_values(isnan(bipolar_values)) = 0;
         winSamples = winDuration * Fs; 
 
-        [nSamples, nChannels] = size(data);
+        [nSamples, nChannels] = size(bipolar_values);
         nWins = floor(nSamples / winSamples);  % number of full windows
         
         % Preallocate arrays to hold bandpower values for each channel and window
@@ -98,7 +98,7 @@ for i = 1:length(listing)
                 % Determine sample indices for this window
                 idxStart = (win-1)*winSamples + 1;
                 idxEnd = win * winSamples;
-                segment = data(idxStart:idxEnd, ch);
+                segment = bipolar_values(idxStart:idxEnd, ch);
                 
                 % Calculate bandpower for each frequency band
                 bp_broadband(win, ch) = bandpower(segment, fs, broadbandRange);
