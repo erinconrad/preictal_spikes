@@ -3,7 +3,7 @@
 
 %% Parameters
 which_sz = 6;
-which_chunk = 5;
+which_chunk = 43;
 sp_time = 300.9;
 times = [sp_time-7.5,sp_time+7.5];
 
