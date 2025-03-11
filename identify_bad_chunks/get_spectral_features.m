@@ -51,7 +51,7 @@ for i = start_sz:end_sz
 
 
     % Make output path
-    curr_output_dir = [out_dir,listing(i).name,'/'];
+    curr_output_dir = [out_dir,sprintf('sz_%d',i),'/'];
     if ~exist(curr_output_dir,"dir"), mkdir(curr_output_dir); end
 
     % Loop over chunks
