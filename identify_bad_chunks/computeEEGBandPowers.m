@@ -8,28 +8,33 @@ function bp = computeEEGBandPowers(data, fs)
 %       fs   - Sampling frequency in Hz.
 %
 %   Output:
-%       bp - Struct with the following fields, each of size
-%            [nOneMinSeg x nChannels]:
-%                .broadband  - Broadband power (1-80 Hz)
-%                .delta      - Delta band (1-4 Hz)
-%                .theta      - Theta band (4-8 Hz)
-%                .alpha      - Alpha band (8-13 Hz)
-%                .beta       - Beta band (13-30 Hz)
-%                .gamma      - Gamma band (30-80 Hz)
-%                .sixtyHz    - 60 Hz noise power (59-61 Hz)
+%       bp - Struct with the following fields:
+%                .broadband  - Median broadband power (1-80 Hz) per one-minute segment
+%                .delta      - Median delta power (1-4 Hz) per one-minute segment
+%                .theta      - Median theta power (4-8 Hz) per one-minute segment
+%                .alpha      - Median alpha power (8-13 Hz) per one-minute segment
+%                .beta       - Median beta power (13-30 Hz) per one-minute segment
+%                .gamma      - Median gamma power (30-80 Hz) per one-minute segment
+%                .sixtyHz    - Median 60 Hz noise power (59-61 Hz) per one-minute segment
+%                .bands      - Structure with the frequency band definitions
+%                .time10sec  - Structure with time markers for each 10-second window:
+%                              .samples: [n10secWins x 2] array with start and end sample indices
+%                              .seconds: [n10secWins x 2] array with start and end times (sec)
 %
-%            Additionally, bp.bands is a struct that records the frequency ranges:
-%                .broadband, .delta, .theta, .alpha, .beta, .gamma, .sixtyHz
+%   The function first divides the data into 10‑second windows, computes the bandpower
+%   for each window, and then groups every six windows into one‑minute segments by taking
+%   the median across those windows.
 
-    % Window durations in seconds
-    winDuration = 10;          % Each short window is 10 seconds
-    oneMinDuration = 60;       % Group into one minute segments
+    %% Set up parameters
+    % Duration settings
+    winDuration = 10;          % Duration of each 10-second window (seconds)
+    oneMinDuration = 60;       % One minute segment duration (seconds)
     nWinsPerMin = oneMinDuration / winDuration;  % 6 windows per minute
-    
+
     % Number of samples per 10-second window
     winSamples = winDuration * fs;
     
-    % Define frequency bands
+    % Define frequency bands (and store them in a struct)
     bands.broadband = [1 50];
     bands.delta     = [1 4];
     bands.theta     = [4 8];
@@ -38,16 +43,23 @@ function bp = computeEEGBandPowers(data, fs)
     bands.gamma     = [30 50];
     bands.sixtyHz   = [59 61];
     
-    % Get the size of the data matrix
+    %% Determine windowing and time markers
     [nSamples, nChannels] = size(data);
+    n10secWins = floor(nSamples / winSamples);  % Total complete 10-second windows
+    nOneMinSeg = floor(n10secWins / nWinsPerMin); % Total complete one-minute segments
     
-    % Determine the number of complete 10-second windows available
-    n10secWins = floor(nSamples / winSamples);
+    % Create time markers for each 10-second window:
+    % Each row will be: [start_sample, end_sample]
+    timeSamples = zeros(n10secWins, 2);
+    for win = 1:n10secWins
+        startSample = (win-1)*winSamples + 1;
+        endSample = win * winSamples;
+        timeSamples(win, :) = [startSample, endSample];
+    end
+    % Convert sample indices to time in seconds
+    timeSeconds = timeSamples / fs;
     
-    % Determine the number of complete one-minute segments
-    nOneMinSeg = floor(n10secWins / nWinsPerMin);
-    
-    % Preallocate arrays for bandpower values in each 10-second window
+    %% Preallocate arrays for bandpower values in each 10-second window
     bp_broadband_10sec = nan(n10secWins, nChannels);
     bp_delta_10sec     = nan(n10secWins, nChannels);
     bp_theta_10sec     = nan(n10secWins, nChannels);
@@ -56,15 +68,13 @@ function bp = computeEEGBandPowers(data, fs)
     bp_gamma_10sec     = nan(n10secWins, nChannels);
     bp_60hz_10sec      = nan(n10secWins, nChannels);
     
-    % Loop over each 10-second window for each channel
+    %% Compute bandpower for each 10-second window and each channel
     for ch = 1:nChannels
         for win = 1:n10secWins
-            % Get indices for the current 10-second segment
             idxStart = (win-1)*winSamples + 1;
             idxEnd = win * winSamples;
             segment = data(idxStart:idxEnd, ch);
             
-            % Compute bandpower for each frequency band in the segment
             bp_broadband_10sec(win, ch) = bandpower(segment, fs, bands.broadband);
             bp_delta_10sec(win, ch)     = bandpower(segment, fs, bands.delta);
             bp_theta_10sec(win, ch)     = bandpower(segment, fs, bands.theta);
@@ -75,7 +85,7 @@ function bp = computeEEGBandPowers(data, fs)
         end
     end
     
-    % Preallocate arrays for one-minute segments (median of 6 windows)
+    %% Group the 10-second windows into one-minute segments by taking the median
     broadband_min = nan(nOneMinSeg, nChannels);
     delta_min     = nan(nOneMinSeg, nChannels);
     theta_min     = nan(nOneMinSeg, nChannels);
@@ -84,12 +94,9 @@ function bp = computeEEGBandPowers(data, fs)
     gamma_min     = nan(nOneMinSeg, nChannels);
     sixtyHz_min   = nan(nOneMinSeg, nChannels);
     
-    % Group the 10-second windows into one-minute segments and take the median
     for ch = 1:nChannels
         for seg = 1:nOneMinSeg
-            % Determine window indices for this one-minute segment
             winIndices = (seg-1)*nWinsPerMin + (1:nWinsPerMin);
-            
             broadband_min(seg, ch) = median(bp_broadband_10sec(winIndices, ch), 'omitnan');
             delta_min(seg, ch)     = median(bp_delta_10sec(winIndices, ch), 'omitnan');
             theta_min(seg, ch)     = median(bp_theta_10sec(winIndices, ch), 'omitnan');
@@ -100,7 +107,7 @@ function bp = computeEEGBandPowers(data, fs)
         end
     end
     
-    % Bundle all the computed bandpower values into a structure
+    %% Bundle all results into the output structure
     bp = struct(...
         'broadband', broadband_min, ...
         'delta',     delta_min, ...
@@ -109,6 +116,7 @@ function bp = computeEEGBandPowers(data, fs)
         'beta',      beta_min, ...
         'gamma',     gamma_min, ...
         'sixtyHz',   sixtyHz_min, ...
-        'bands',     bands ...
+        'bands',     bands, ...
+        'time10sec', struct('samples', timeSamples, 'seconds', timeSeconds) ...
     );
 end
