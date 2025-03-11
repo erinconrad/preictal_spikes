@@ -57,7 +57,7 @@ for i = start_sz:end_sz
         bipolar_values(isnan(bipolar_values)) = 0;
         
         %% Compute frequency-specific bandpowers
-        bp = computeEEGBandPowers(bipolar_values, fs);
+        bp = computeEEGBandPowers(bipolar_values, Fs);
 
         %% Save this
         save([curr_output_dir,sprintf('chunk_%d.mat',j)],...
