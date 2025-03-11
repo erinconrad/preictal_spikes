@@ -52,7 +52,7 @@ for i = 1:nchunks
     end
     load([curr_spectral_path,sprintf('chunk_%d.mat',i)]);
 
-    bp_of_interest = median_sixty;
+    bp_of_interest = median_gamma;
     mean_bp = mean(bp_of_interest(~strcmp(bipolar_labels,'-') & ...
         ~contains(bipolar_labels,'EKG')));
     all_bp(i,1) = mean_bp;

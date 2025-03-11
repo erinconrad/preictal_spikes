@@ -2,8 +2,8 @@
 % Requires you are samba mounted!
 
 %% Parameters
-which_sz = 18;
-which_chunk = 1;
+which_sz = 6;
+which_chunk = 5;
 sp_time = 323.79;
 times = [sp_time-7.5,sp_time+7.5];
 
