@@ -10,7 +10,7 @@ alphaBand   = [8 13];   % Alpha: 8-13 Hz
 betaBand    = [13 30];  % Beta: 13-30 Hz
 gammaBand   = [30 50];  % Gamma: 30-50 Hz
 broadbandRange = [1 50];
-sixtyHzBand = [57 63];
+sixtyHzBand = [59 61];
 
 if ~exist("start_sz","var")
     error('list start sz');
@@ -28,22 +28,16 @@ if ~exist(out_dir,'dir'), mkdir(out_dir); end
 
 %% Main
 % Loop over eeg subdirs
-listing = dir(eeg_dir);
-for i = 1:length(listing)
+for i = start_sz:end_sz
 
-    % Skip if not an expected name
-    if ~contains(listing(i).name,'sz') || strcmp(listing(i).name(1),'.')
-        continue;
-    end
-
+    
     fprintf('\nDoing seizure %d\n',i);
     
-    numStr = regexp(listing(i).name,'\d+','match');
-    if str2num(numStr{1})<start_sz, continue; end
-    if str2num(numStr{1})>end_sz, continue; end
+    
 
     % get the full path
-    curr_eeg_path = [listing(i).folder,'/',listing(i).name,'/'];
+    curr_eeg_path = [eeg_dir,sprintf('sz_%d',i),'/'];
+    if ~exist(curr_eeg_path,"dir"), continue; end
 
     % Look for and delete files within the eeg path that start with '._'. These will
     % screw up spike net

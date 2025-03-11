@@ -18,22 +18,21 @@ curr_prob_path = [spike_prob_path,sprintf('sz_%d',which_sz),'/'];
 curr_spectral_path = [spectral_path,sprintf('sz_%d',which_sz),'/'];
 
 %% Initialize stuff
-probs = nan(npoints*nchunks,1);
-times = linspace(0,nchunks*chunk_dur,npoints*nchunks);
-transitions = nan(npoints*nchunks,1);
-mean_probs = nan(npoints*nchunks,1);
-all_bp = nan(npoints*nchunks,1);
+times = linspace(0,nchunks*chunk_dur,nchunks);
+transitions = nan(nchunks,1);
+mean_probs = nan(nchunks,1);
+all_bp = nan(nchunks,1);
 
 % Loop over the probs
 for i = 1:nchunks
 
-    curr_transitions = zeros(npoints,1);
+    curr_transitions = 0;
     if i == sz_chunk-1
         curr_transitions(end) = 2;
     else
         curr_transitions(end) = 1;
     end
-    transitions((i-1)*npoints+1:i*npoints,1) = curr_transitions;
+    transitions(i,1) = curr_transitions;
 
     if ~exist([curr_prob_path,sprintf('chunk_%d_sn2r11.csv',i)],"file")
         continue;
@@ -44,8 +43,7 @@ for i = 1:nchunks
 
     % convert to array
     a = table2array(T);
-    probs((i-1)*npoints+1:i*npoints,1) = a;
-    mean_probs((i-1)*npoints+1:i*npoints,1) = sum(a>prob_thresh);
+    mean_probs(i,1) = sum(a>prob_thresh);
 
 
     % load the BP
@@ -54,10 +52,10 @@ for i = 1:nchunks
     end
     load([curr_spectral_path,sprintf('chunk_%d.mat',i)]);
 
-    bp_of_interest = bp_broadband;
+    bp_of_interest = median_sixty;
     mean_bp = mean(bp_of_interest(~strcmp(bipolar_labels,'-') & ...
         ~contains(bipolar_labels,'EKG')));
-    all_bp((i-1)*npoints+1:i*npoints,1) = mean_bp;
+    all_bp(i,1) = mean_bp;
 
 
 end
@@ -68,23 +66,26 @@ figure
 set(gcf,'Position',[1 1 1400 1000])
 tiledlayout(2,1)
 nexttile
-plot(times,mean_probs,'LineWidth',2);
+plot(mean_probs,'LineWidth',2);
 ylabel('Probs')
 hold on
+%
 for i = 1:length(transitions)
     if transitions(i) == 1
-        plot([times(i) times(i)],ylim,'k--');
+        plot([i i],ylim,'k--');
     end
     if transitions(i) == 2
-        plot([times(i) times(i)],ylim,'r--','LineWidth',2);
+        plot([i i],ylim,'r--','LineWidth',2);
     end
 
 end
+%
 
 
 nexttile
-plot(times,all_bp,'LineWidth',2);
+plot(all_bp,'LineWidth',2);
 ylabel('Power')
+%{
 hold on
 for i = 1:length(transitions)
     if transitions(i) == 1
@@ -95,6 +96,7 @@ for i = 1:length(transitions)
     end
 
 end
+%}
 
 
 

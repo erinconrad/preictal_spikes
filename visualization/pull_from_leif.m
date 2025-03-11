@@ -2,9 +2,9 @@
 % Requires you are samba mounted!
 
 %% Parameters
-which_sz = 6;
-which_chunk = 43;
-sp_time = 300.9;
+which_sz = 18;
+which_chunk = 1;
+sp_time = 323.79;
 times = [sp_time-7.5,sp_time+7.5];
 
 addpath(genpath('../'))
@@ -22,10 +22,11 @@ samples = round(times(1)*Fs):round(times(2)*Fs);
 [bipolar_values,bipolar_labels] = scalp_bipolar(channels,data');
 
 %% Plot it
-plot_scalp_eeg(bipolar_values(samples,:),Fs,bipolar_labels)
-%plot_scalp_eeg(bipolar_values,Fs,bipolar_labels)
+%plot_scalp_eeg(bipolar_values(samples,:),Fs,bipolar_labels)
+plot_scalp_eeg(bipolar_values,Fs,bipolar_labels)
 
 %% Spectrogram
+%{
 channelIndex = 2;  % Replace with the desired channel number
 
 % Define spectrogram parameters
@@ -40,3 +41,5 @@ spectrogram(bipolar_values(:, channelIndex), window, noverlap, nfft, fs, 'yaxis'
 title(['Spectrogram of Channel ' num2str(channelIndex)]);
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
+
+%}
